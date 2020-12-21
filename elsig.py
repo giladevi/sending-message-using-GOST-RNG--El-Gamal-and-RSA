@@ -1,3 +1,5 @@
+import secrets
+
 from Crypto.Util.number import *
 from Crypto import Random
 import Crypto
@@ -14,7 +16,7 @@ def signMessage(message):
     msg = message
 
     p = Crypto.Util.number.getPrime(bits, randfunc=Crypto.Random.get_random_bytes)  # large prime p
-    privateKey = randint(0, p - 1)  # private key s
+    privateKey = secrets.randbelow(p)  # private key s using RNG from 0 to p-1
     publicKey = pow(g, privateKey, p)  # public key v: v=g^s mod p
 
     # e is a random integer with a conditions of 1 <= e <= (p-1) and gcd(e,p-1)=1
