@@ -1,6 +1,8 @@
 # client.py
 import time, socket, sys
 
+from elsig import verifyMessage
+
 print("\nWelcome to Chat Room\n")
 print("Initialising....\n")
 time.sleep(1)
@@ -23,9 +25,13 @@ s_name = s_name.decode()
 print(s_name, "has joined the chat room\nEnter [e] to exit chat room\n")
 
 while True:
-    message = s.recv(1024)
-    message = message.decode()
-    print(s_name, ":", message)
+    message = s.recv(1024).decode()
+    signature = s.recv(1024).decode()
+    if verifyMessage(signature.split()):  # creates an array from the signature string
+        print("Message is safe")
+        print(s_name, ":", message)
+    else:
+        print("Message is not safe, signature is invalid!!!!")
     message = input(str("Me : "))
     if message == "[e]":
         message = "Left chat room!"

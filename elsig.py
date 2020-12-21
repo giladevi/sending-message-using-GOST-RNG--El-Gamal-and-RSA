@@ -8,42 +8,38 @@ from random import randint
 import hashlib
 
 bits = 60
-msg = "Hello"
-
-if len(sys.argv) > 1:
-    msg = str(sys.argv[1])
-if len(sys.argv) > 2:
-    bits = int(sys.argv[2])
-
-p = Crypto.Util.number.getPrime(bits, randfunc=Crypto.Random.get_random_bytes)  # large prime p
 g = 2  # primitive root
 
-s = randint(0, p - 1)  # private key
-v = pow(g, s, p)  # public key: v=g^s mod p
-# e is a random integer with a conditions of 1 <= e <= (p-1) and gcd(e,p-1)=1
-e = Crypto.Util.number.getPrime(bits, randfunc=Crypto.Random.get_random_bytes)
-e_1 = (libnum.invmod(e, p - 1))  # the inverse of e mod (p-1)
+def signMessage(message):
+    msg = message
 
-D = int.from_bytes(hashlib.sha256(msg.encode()).digest(), byteorder='big')  # hashed message
+    p = Crypto.Util.number.getPrime(bits, randfunc=Crypto.Random.get_random_bytes)  # large prime p
+    privateKey = randint(0, p - 1)  # private key s
+    publicKey = pow(g, privateKey, p)  # public key v: v=g^s mod p
 
-# signatures:
-S_1 = pow(g, e, p)  # temporary key (r)
-S_2 = ((D - s * S_1) * e_1) % (p - 1)  # value of S2
+    # e is a random integer with a conditions of 1 <= e <= (p-1) and gcd(e,p-1)=1
+    e = Crypto.Util.number.getPrime(bits, randfunc=Crypto.Random.get_random_bytes)
+    e_1 = (libnum.invmod(e, p - 1))  # the inverse of e mod (p-1)
 
-# verification:
-v_1 = (pow(v, S_1, p) * pow(S_1, S_2, p)) % p
-v_2 = pow(g, D, p)
+    hashedMessage = int.from_bytes(hashlib.sha256(msg.encode()).digest(), byteorder='big')  # hashed message
 
-# v_1 and v_2 should match
+    # signatures:
+    S_1 = pow(g, e, p)  # temporary key (r)
+    S_2 = ((hashedMessage - privateKey * S_1) * e_1) % (p - 1)  # signature
+    return ""+str(S_2)+" "+str(S_1)+" "+str(publicKey)+" "+str(hashedMessage)+" "+str(p)
 
-print("Message: %s " % msg)
-print("g: %s" % g)
-print("p: %s" % p)
-print("\nv: %s" % v)
-print("e: %s" % e)
-print("\ns: %s" % s)
 
-print("\nS_1= %s" % S_1)
-print("S_2=%s" % S_2)
-print("\nV_1=%s" % v_1)
-print("v_2=%s" % v_2)
+def verifyMessage(signatureArray):
+    S_2 = int(signatureArray[0])
+    S_1 = int(signatureArray[1])
+    publicKey = int(signatureArray[2])
+    hashedMessage = int(signatureArray[3])
+    p = int(signatureArray[4])
+
+    # verification:
+    v_1 = (pow(publicKey, S_1, p) * pow(S_1, S_2, p)) % p
+    v_2 = pow(g, hashedMessage, p)
+
+    # v_1 and v_2 should match
+    if v_1 == v_2: return True
+    else: return False
