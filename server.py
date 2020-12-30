@@ -1,6 +1,8 @@
 # server.py
 import time, socket, sys
 
+from elsig import signMessage
+
 print("\nWelcome to Chat Room\n")
 print("Initialising....\n")
 time.sleep(1)
@@ -30,7 +32,10 @@ while True:
         conn.send(message.encode())
         print("\n")
         break
+
+    signature = signMessage(message)
     conn.send(message.encode())
+    conn.send(signature.encode())
     message = conn.recv(1024)
     message = message.decode()
     print(s_name, ":", message)

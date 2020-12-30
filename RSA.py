@@ -5,7 +5,7 @@ import libnum
 import sys
 
 bits=60
-msg="gilad shalom"
+msg="hello"
 
 if (len(sys.argv)>1):
         msg=str(sys.argv[1])
