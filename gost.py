@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 sbox = (
     (4, 10, 9, 2, 13, 8, 0, 14, 6, 11, 1, 12, 7, 15, 5, 3),
     (14, 11, 4, 12, 6, 13, 15, 10, 2, 3, 8, 1, 0, 7, 5, 9),
@@ -22,12 +21,15 @@ def f_function(var, key):
     assert _bit_length(var) <= 32
     assert _bit_length(key) <= 32
 
+    # (var + subkey)mod 2^32
     temp = (var + key) % (1 << 32)
 
+    # sbox[row = round][column = decimal value of the 4bits]
     output = 0
     for i in range(8):
         output |= ((sbox[i][(temp >> (4 * i)) & 0b1111]) << (4 * i))
 
+    # shift left 11
     output = ((output >> (32 - 11)) | (output << 11)) & 0xFFFFFFFF
 
     return output
@@ -53,6 +55,7 @@ class GOST:
 
     def set_key(self, master_key):
         assert _bit_length(master_key) <= 256
+        #master_key = [K0, K1, K2, K3, K4, K5, K6, K7]   32bits each subkey
         for i in range(8):
             self.master_key[i] = (master_key >> (32 * i)) & 0xFFFFFFFF
         # print 'master_key', [hex(i) for i in self.master_key]
@@ -63,10 +66,12 @@ class GOST:
         text_right = plaintext & 0xFFFFFFFF
         # print 'text', hex(text_left), hex(text_right)
 
+        # K0, K1, K2, K3, K4, K5, K6, K7, K0, K1, K2, K3, K4, K5, K6, K7, K0, K1, K2, K3, K4, K5, K6, K7
         for i in range(24):
             text_left, text_right = round_encryption(
                 text_left, text_right, self.master_key[i % 8])
 
+        #K7, K6, K5, K4, K3, K2, K1, K0
         for i in range(8):
             text_left, text_right = round_encryption(
                 text_left, text_right, self.master_key[7 - i])
@@ -78,10 +83,12 @@ class GOST:
         text_left = ciphertext >> 32
         text_right = ciphertext & 0xFFFFFFFF
 
+        #K0, K1, K2, K3, K4, K5, K6, K7
         for i in range(8):
             text_left, text_right = round_decryption(
                 text_left, text_right, self.master_key[i])
 
+        # K7, K6, K5, K4, K3, K2, K1, K0, K7, K6, K5, K4, K3, K2, K1, K0, K7, K6, K5, K4, K3, K2, K1, K0
         for i in range(24):
             text_left, text_right = round_decryption(
                 text_left, text_right, self.master_key[(7 - i) % 8])
@@ -90,18 +97,51 @@ class GOST:
 
 
 if __name__ == '__main__':
-    text = 0xfedcba0987654321
+    #text = 0xfedcba0987654321
     key = 0x1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff
+    num = 1000
+    encryptionList = []
+    decryptionList = []
 
     my_GOST = GOST()
     my_GOST.set_key(key)
 
-    num = 1000
+    print("HELLO, enter sentence to encryption: ")
+    tmp = input().upper()
+    lst = tmp.split(' ')
 
-    for i in range(num):
-        text = my_GOST.encrypt(text)
-    print hex(text)
 
-    for i in range(num):
-        text = my_GOST.decrypt(text)
-    print hex(text)
+    for t in lst:
+        numList = [ord(c) for c in t]
+        text = int(''.join(map(str, numList)))
+        print(type(text))
+
+        print("mekori")
+        print(text)
+
+        print("encryption")
+        for i in range(num):
+            text = my_GOST.encrypt(text)
+        print(text)
+        encryptionList.append(text)
+
+        print("decryption")
+        for i in range(num):
+            text = my_GOST.decrypt(text)
+        print(text)
+
+        text = str(text) #convert from int to str to use len()
+        out = [(text[i:i+2]) for i in range(0,len(text),2)] #split into list 2 digits per cell
+        print(out) #['12','34','56']
+
+        word = ""
+        for o in out:
+            o = int(o) #build word from int
+            word += chr(o) #build word + convert ascii code to char
+        print(word)
+        decryptionList.append(word)
+
+    decryptionText = " ".join(decryptionList).lower() #join all the words in list
+
+    print(encryptionList)
+    print(decryptionText)
