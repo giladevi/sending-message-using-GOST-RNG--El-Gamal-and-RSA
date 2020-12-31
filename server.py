@@ -31,9 +31,6 @@ while True:
     text,my_GOST = GOST_init(message)
     message = GOST_encrypt(text,my_GOST)
     encrypt_msg = " ".join(message)
-    # for t in message:
-    #     encrypt_msg = str(t)
-    print(encrypt_msg)
 
     if message == "[e]":
         message = "Left chat room!"
