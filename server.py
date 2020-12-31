@@ -1,6 +1,6 @@
 # server.py
 import time, socket, sys
-
+from Crypto.Util.number import bytes_to_long
 from elsig import signMessage
 from gost import *
 
@@ -26,10 +26,20 @@ s_name = s_name.decode()
 print(s_name, "has connected to the chat room\nEnter [e] to exit chat room\n")
 conn.send(name.encode())
 
+n = int(conn.recv(1024).decode())
+public_key = int(conn.recv(1024).decode())
+key = 0x1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff
+key = bytes_to_long(str(key).encode('utf-8'))
+encrypted_key = pow(key, public_key, n)  # encrypted GOST key
+print("encrypted key server = {}".format(encrypted_key))
+
+
+######## (long_to_bytes(res)) to read the key after decrypted ###############
+
 while True:
     message = input(str("Me : "))
-    text,my_GOST = GOST_init(message)
-    message = GOST_encrypt(text,my_GOST)
+    text, my_GOST = GOST_init(message)
+    message = GOST_encrypt(text, my_GOST)
     encrypt_msg = " ".join(message)
 
     if message == "[e]":
@@ -40,6 +50,7 @@ while True:
 
     signature = signMessage(encrypt_msg)
     conn.send(encrypt_msg.encode())
+    conn.send(str(encrypted_key).encode())
     conn.send(signature.encode())
     message = conn.recv(1024)
     message = message.decode()
