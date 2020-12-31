@@ -55,7 +55,7 @@ class GOST:
 
     def set_key(self, master_key):
         assert _bit_length(master_key) <= 256
-        #master_key = [K0, K1, K2, K3, K4, K5, K6, K7]   32bits each subkey
+        # master_key = [K0, K1, K2, K3, K4, K5, K6, K7]   32bits each subkey
         for i in range(8):
             self.master_key[i] = (master_key >> (32 * i)) & 0xFFFFFFFF
         # print 'master_key', [hex(i) for i in self.master_key]
@@ -71,7 +71,7 @@ class GOST:
             text_left, text_right = round_encryption(
                 text_left, text_right, self.master_key[i % 8])
 
-        #K7, K6, K5, K4, K3, K2, K1, K0
+        # K7, K6, K5, K4, K3, K2, K1, K0
         for i in range(8):
             text_left, text_right = round_encryption(
                 text_left, text_right, self.master_key[7 - i])
@@ -83,7 +83,7 @@ class GOST:
         text_left = ciphertext >> 32
         text_right = ciphertext & 0xFFFFFFFF
 
-        #K0, K1, K2, K3, K4, K5, K6, K7
+        # K0, K1, K2, K3, K4, K5, K6, K7
         for i in range(8):
             text_left, text_right = round_decryption(
                 text_left, text_right, self.master_key[i])
@@ -96,25 +96,61 @@ class GOST:
         return (text_left << 32) | text_right
 
 
-if __name__ == '__main__':
-    #text = 0xfedcba0987654321
+def GOST_init(message):
+    # text = 0xfedcba0987654321
     key = 0x1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff
-    num = 1000
-    encryptionList = []
-    decryptionList = []
+    # num = 1000
+    # encryptionList = []
+    # decryptionList = []
 
     my_GOST = GOST()
     my_GOST.set_key(key)
 
-    print("HELLO, enter sentence to encryption: ")
-    tmp = input().upper()
+    tmp = message.upper()
     lst = tmp.split(' ')
 
+    # for t in lst:
+    #     numList = [ord(c) for c in t]
+    #     text = int(''.join(map(str, numList)))
+    # print("mekori")
+    # print(text)
 
+    # print("encryption")
+    # for i in range(num):
+    #     text = my_GOST.encrypt(text)
+    # print(text)
+    # encryptionList.append(text)
+
+    # print("decryption")
+    #     for i in range(num):
+    #         text = my_GOST.decrypt(text)
+    #     print(text)
+    #
+    #     text = str(text) #convert from int to str to use len()
+    #     out = [(text[i:i+2]) for i in range(0,len(text),2)] #split into list 2 digits per cell
+    #     print(out) #['12','34','56']
+    #
+    #     word = ""
+    #     for o in out:
+    #         o = int(o) #build word from int
+    #         word += chr(o) #build word + convert ascii code to char
+    #     print(word)
+    #     decryptionList.append(word)
+    #
+    # decryptionText = " ".join(decryptionList).lower() #join all the words in list
+    #
+    # print(encryptionList)
+    return lst, my_GOST
+
+
+def GOST_encrypt(lst, my_GOST):
+    num = 1000
+    encryptionList = []
+
+    # manipulate user text so it could be encrypted
     for t in lst:
         numList = [ord(c) for c in t]
         text = int(''.join(map(str, numList)))
-        print(type(text))
 
         print("mekori")
         print(text)
@@ -123,25 +159,36 @@ if __name__ == '__main__':
         for i in range(num):
             text = my_GOST.encrypt(text)
         print(text)
-        encryptionList.append(text)
+        encryptionList.append(str(text))
+    return encryptionList
 
-        print("decryption")
+
+def GOST_decrypt(lst):
+    key = 0x1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff
+    my_GOST = GOST()
+    my_GOST.set_key(key)
+
+
+    num = 1000
+    decryptionList = []
+    lst = lst.split(' ')
+    # for t in lst:
+    #     numList = [ord(c) for c in t]
+    #     text = int(''.join(map(str, numList)))
+    for text in lst:
         for i in range(num):
-            text = my_GOST.decrypt(text)
-        print(text)
+            text = my_GOST.decrypt(int(text))
 
-        text = str(text) #convert from int to str to use len()
-        out = [(text[i:i+2]) for i in range(0,len(text),2)] #split into list 2 digits per cell
-        print(out) #['12','34','56']
+        text = str(text)  # convert from int to str to use len()
+        out = [(text[i:i + 2]) for i in range(0, len(text), 2)]  # split into list 2 digits per cell
+        print(out)  # ['12','34','56']
 
         word = ""
         for o in out:
-            o = int(o) #build word from int
-            word += chr(o) #build word + convert ascii code to char
+            o = int(o)  # build word from int
+            word += chr(o)  # build word + convert ascii code to char
         print(word)
         decryptionList.append(word)
 
-    decryptionText = " ".join(decryptionList).lower() #join all the words in list
-
-    print(encryptionList)
-    print(decryptionText)
+    decryptionText = " ".join(decryptionList).lower()  # join all the words in list
+    return decryptionText

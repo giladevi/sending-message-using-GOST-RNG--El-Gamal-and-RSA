@@ -2,6 +2,7 @@
 import time, socket, sys
 
 from elsig import signMessage
+from gost import *
 
 print("\nWelcome to Chat Room\n")
 print("Initialising....\n")
@@ -27,14 +28,21 @@ conn.send(name.encode())
 
 while True:
     message = input(str("Me : "))
+    text,my_GOST = GOST_init(message)
+    message = GOST_encrypt(text,my_GOST)
+    encrypt_msg = " ".join(message)
+    # for t in message:
+    #     encrypt_msg = str(t)
+    print(encrypt_msg)
+
     if message == "[e]":
         message = "Left chat room!"
         conn.send(message.encode())
         print("\n")
         break
 
-    signature = signMessage(message)
-    conn.send(message.encode())
+    signature = signMessage(encrypt_msg)
+    conn.send(encrypt_msg.encode())
     conn.send(signature.encode())
     message = conn.recv(1024)
     message = message.decode()

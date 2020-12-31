@@ -2,6 +2,7 @@
 import time, socket, sys
 
 from elsig import verifyMessage
+from gost import *
 
 print("\nWelcome to Chat Room\n")
 print("Initialising....\n")
@@ -29,6 +30,7 @@ while True:
     signature = s.recv(1024).decode()
     if verifyMessage(signature.split()):  # creates an array from the signature string
         print("Message is safe")
+        message = GOST_decrypt(message)
         print(s_name, ":", message)
     else:
         print("Message is not safe, signature is invalid!!!!")
