@@ -96,8 +96,8 @@ class GOST:
         return (text_left << 32) | text_right
 
 
-def GOST_init(message):
-    key = 0x1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff
+def GOST_init(message, key):
+    # key = 0x1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff
 
     my_GOST = GOST()
     my_GOST.set_key(key)
@@ -127,8 +127,8 @@ def GOST_encrypt(lst, my_GOST):
     return encryptionList
 
 
-def GOST_decrypt(lst):
-    key = 0x1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff
+def GOST_decrypt(lst, key):
+    # key = 0x1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff
     my_GOST = GOST()
     my_GOST.set_key(key)
 
