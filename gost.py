@@ -97,8 +97,6 @@ class GOST:
 
 
 def GOST_init(message, key):
-    # key = 0x1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff
-
     my_GOST = GOST()
     my_GOST.set_key(key)
 
@@ -116,22 +114,16 @@ def GOST_encrypt(lst, my_GOST):
         numList = [ord(c) for c in t]
         text = int(''.join(map(str, numList)))
 
-        # print("mekori")
-        # print(text)
-
-        # print("encryption")
         for i in range(num):
             text = my_GOST.encrypt(text)
-        # print(text)
         encryptionList.append(str(text))
+
     return encryptionList
 
 
 def GOST_decrypt(lst, key):
-    # key = 0x1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff
     my_GOST = GOST()
     my_GOST.set_key(key)
-
 
     num = 1000
     decryptionList = []
@@ -142,13 +134,11 @@ def GOST_decrypt(lst, key):
 
         text = str(text)  # convert from int to str to use len()
         out = [(text[i:i + 2]) for i in range(0, len(text), 2)]  # split into list 2 digits per cell
-        # print(out)  # ['12','34','56']
 
         word = ""
         for o in out:
             o = int(o)  # build word from int
             word += chr(o)  # build word + convert ascii code to char
-        # print(word)
         decryptionList.append(word)
 
     decryptionText = " ".join(decryptionList).lower()  # join all the words in list

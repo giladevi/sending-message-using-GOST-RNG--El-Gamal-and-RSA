@@ -28,6 +28,7 @@ def signMessage(message):
     # signatures:
     S_1 = pow(g, e, p)  # temporary key (r)
     S_2 = ((hashedMessage - privateKey * S_1) * e_1) % (p - 1)  # signature
+    # sending signature along with the hashed message, public key and the prime number p
     return ""+str(S_2)+" "+str(S_1)+" "+str(publicKey)+" "+str(hashedMessage)+" "+str(p)
 
 
